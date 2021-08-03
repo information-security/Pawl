@@ -84,10 +84,10 @@ class Connector {
 
                 $stream->removeListener('data', $headerParser);
 
-                $response = gPsr\parse_response($buffer);
+                $response = gPsr\Message::parseResponse($buffer);
 
                 if (!$this->_negotiator->validateResponse($request, $response)) {
-                    $futureWsConn->reject(new \DomainException(gPsr\str($response)));
+                    $futureWsConn->reject(new \DomainException(gPsr\Message::toString($response)));
                     $stream->close();
 
                     return;
@@ -109,7 +109,7 @@ class Connector {
             };
 
             $stream->on('data', $headerParser);
-            $stream->write(gPsr\str($request));
+            $stream->write(gPsr\Message::toString($request));
         }, array($futureWsConn, 'reject'));
 
         return $futureWsConn->promise();
@@ -123,7 +123,7 @@ class Connector {
      * @return \Psr\Http\Message\RequestInterface
      */
     protected function generateRequest($url, array $subProtocols, array $headers) {
-        $uri = gPsr\uri_for($url);
+        $uri = gPsr\Utils::uriFor($url);
 
         $scheme = $uri->getScheme();
 
